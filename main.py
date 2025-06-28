@@ -5,7 +5,7 @@ from pyrogram.enums import ChatAction, ParseMode  # ✅ إضافة ParseMode ه�
 
 API_ID = 20944746
 API_HASH = "d169162c1bcf092a6773e685c62c3894"
-BOT_TOKEN = "7168284368:AAE4wLkEMpKkKKkaWBv9FEtdk6rsK5sGJng"
+BOT_TOKEN = "7427094764:AAGEyokyZofIwvnm5Vzf0DXgb77JzNjoVo0"
 
 GEMINI_API_KEY = "AIzaSyAOPduTp5DO_8MuPCbJnO0Dgl9G0O1CKn4"
 GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
