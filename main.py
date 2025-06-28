@@ -1,8 +1,11 @@
 import asyncio
 import aiohttp
 from pyrogram import Client, filters
-from pyrogram.enums import ChatAction, ParseMode  # ✅ إضافة ParseMode هنا
+from pyrogram.enums import ChatAction, ParseMode
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
+# بيانات API و البوت
 API_ID = 20944746
 API_HASH = "d169162c1bcf092a6773e685c62c3894"
 BOT_TOKEN = "7427094764:AAGEyokyZofIwvnm5Vzf0DXgb77JzNjoVo0"
@@ -14,6 +17,18 @@ app = Client("bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 user_histories = {}
 
+# سيرفر health check على port 8080
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b'Bot is running')
+
+def run_server():
+    server = HTTPServer(('0.0.0.0', 8080), HealthHandler)
+    server.serve_forever()
+
+# safe edit function
 async def safe_edit_message(msg, text):
     while True:
         try:
@@ -34,6 +49,7 @@ async def safe_edit_message(msg, text):
                 print("Other error:", e)
                 break
 
+# /start command
 @app.on_message(filters.command("start"))
 async def start_handler(client, message):
     start_text = (
@@ -59,12 +75,14 @@ async def start_handler(client, message):
         disable_web_page_preview=True
     )
 
+# /reset & /clear commands
 @app.on_message(filters.command("reset") | filters.command("clear"))
 async def reset_history(client, message):
     user_id = message.from_user.id
     user_histories[user_id] = []
     await message.reply_text("✅ <b>تم حذف سجل المحادثة الخاص بك بنجاح!</b>", parse_mode=ParseMode.HTML)
 
+# رسائل المستخدم العادية
 @app.on_message(filters.text & ~filters.command(["start", "reset", "clear"]))
 async def handle_message(client, message):
     user_id = message.from_user.id
@@ -126,6 +144,8 @@ async def handle_message(client, message):
     except Exception as e:
         await safe_edit_message(sent_msg, f"❌ حدث خطأ: {e}")
 
+# تشغيل البوت والسيرفر معًا
 if __name__ == "__main__":
     print("البوت يعمل ...")
+    threading.Thread(target=run_server, daemon=True).start()  # سيرفر healthcheck
     app.run()
